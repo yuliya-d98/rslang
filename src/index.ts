@@ -1,1 +1,5 @@
-console.log('hello');
+import App from './ts/app';
+
+const app = new App();
+
+app.run();

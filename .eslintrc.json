@@ -1,35 +1,35 @@
 {
-    "env": {
-        "browser": true,
-        "es2021": true
-    },
-    "extends": [
-        "airbnb-typescript/base",
-        "plugin:@typescript-eslint/recommended",
-        "plugin:@typescript-eslint/recommended-requiring-type-checking",
-        "plugin:eslint-plugin-import/recommended",
-        "plugin:eslint-comments/recommended",
-        "plugin:prettier/recommended"
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": [
+    "airbnb-typescript/base",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:eslint-plugin-import/recommended",
+    "plugin:eslint-comments/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+    "no-debugger": "off",
+    "no-console": "off",
+    "class-methods-use-this": "off",
+    "import/prefer-default-export": "off",
+    "@typescript-eslint/no-explicit-any": "error",
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto"
+      }
     ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-        "project": "./tsconfig.json"
-    },
-    "plugins": ["@typescript-eslint"],
-    "rules": {
-        "no-debugger": "off",
-        "no-console": "off",
-        "class-methods-use-this": "off",
-        "import/prefer-default-export": "off",
-        "@typescript-eslint/no-explicit-any": "error",
-        "prettier/prettier": [
-            "error",
-            {
-                "endOfLine": "auto"
-            }
-        ],
-        "indent": ["warn", 2],
-        "no-plusplus": "warn"
-    },
-    "ignorePatterns": ["*config.js"]
+    "indent": ["warn", 2, { "SwitchCase": 1 }],
+    "no-plusplus": "warn"
+  },
+  "ignorePatterns": ["*config.js"]
 }
