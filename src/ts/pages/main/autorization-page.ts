@@ -8,16 +8,70 @@ class AuthorizationPage {
 
   isRegistration: boolean;
 
+  isAuthorized: boolean;
+
+  isUserOpened: boolean;
+
   constructor() {
     this.body = document.body as HTMLBodyElement;
     this.isRegistration = true;
+    this.isAuthorized = Boolean(localStorage.getItem('token'));
+    this.isUserOpened = false;
   }
 
   open() {
+    if (this.isAuthorized && !this.isUserOpened) {
+      this.showUser();
+    } else if (this.isAuthorized && this.isUserOpened) {
+      this.closeUser();
+    } else {
+      this.openModal();
+    }
+  }
+
+  showUser() {
+    const container = document.createElement('div');
+    container.classList.add('user');
+
+    const text = document.createElement('p');
+    text.classList.add('user__name');
+    text.innerText = 'Твой юзернейм:';
+    container.append(text);
+
+    const username = document.createElement('p');
+    username.classList.add('user__name');
+    username.innerText = localStorage.getItem('name') || 'no username';
+    container.append(username);
+
+    const logout = document.createElement('div');
+    logout.classList.add('user__logout');
+    logout.innerText = 'Выйти';
+    logout.addEventListener('click', () => {
+      localStorage.removeItem('name');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      this.isAuthorized = false;
+      this.closeUser();
+    });
+    container.append(logout);
+
+    const header = document.querySelectorAll('.container')[0];
+    header?.append(container);
+    this.isUserOpened = true;
+  }
+
+  closeUser() {
+    const user = document.querySelector('.user');
+    user?.remove();
+    this.isUserOpened = false;
+  }
+
+  openModal() {
     const background = document.createElement('div');
     background.classList.add('authorization__background');
     background.addEventListener('click', () => {
-      this.close();
+      this.closeModal();
     });
     this.body.append(background);
 
@@ -28,7 +82,7 @@ class AuthorizationPage {
     closeButton.classList.add('authorization__close-btn');
     closeButton.innerText = 'X';
     closeButton.addEventListener('click', () => {
-      this.close();
+      this.closeModal();
     });
     container.append(closeButton);
 
@@ -145,10 +199,23 @@ class AuthorizationPage {
             password: passwordInput.value,
           })
           .then((content) => {
-            console.log(content);
+            localStorage.setItem('name', content.name);
+            localStorage.setItem('userId', content.id);
+            return content;
           })
           .then(() => {
-            this.close();
+            users
+              .signIn({
+                email: mailInput.value,
+                password: passwordInput.value,
+              })
+              .then((responce) => {
+                localStorage.setItem('token', responce.token);
+                localStorage.setItem('refreshToken', responce.refreshToken);
+                this.closeModal();
+                this.isAuthorized = true;
+              })
+              .catch((error) => console.error(error));
           })
           .catch((error) => console.error(error));
       }
@@ -193,12 +260,35 @@ class AuthorizationPage {
     submit.classList.add('authorization__forms_submit-btn');
     submit.type = 'submit';
     submit.innerText = 'Войти';
+    submit.addEventListener('click', (e) => {
+      e.preventDefault();
+      users
+        .signIn({
+          email: mailInput.value,
+          password: passwordInput.value,
+        })
+        .then((responce) => {
+          localStorage.setItem('name', responce.name);
+          localStorage.setItem('userId', responce.userId);
+          users
+            .getNewUserTokens(responce.userId)
+            .then((content) => {
+              localStorage.setItem('token', content.token);
+              localStorage.setItem('refreshToken', content.refreshToken);
+            })
+            .then(() => {
+              this.closeModal();
+            })
+            .catch((error) => console.error(error));
+        })
+        .catch((error) => console.error(error));
+    });
     container.append(submit);
 
     return container;
   }
 
-  close() {
+  closeModal() {
     const background = document.querySelector('.authorization__background');
     const form = document.querySelector('.authorization__container');
     background?.remove();

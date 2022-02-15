@@ -42,6 +42,9 @@ class Users extends Api {
       },
       body: JSON.stringify(user),
     });
+    if (!rawResponse.ok) {
+      throw new Error(rawResponse.statusText);
+    }
     const content = (await rawResponse.json()) as User;
 
     console.log(content);
@@ -51,6 +54,9 @@ class Users extends Api {
     const rawResponse = await fetch(`https://${this.backendDeploy}.herokuapp.com/users/${userId}`, {
       method: 'DELETE',
     });
+    if (!rawResponse.ok) {
+      throw new Error(rawResponse.statusText);
+    }
     if (rawResponse.ok) return;
   }
 
@@ -64,9 +70,12 @@ class Users extends Api {
         },
       }
     );
+    if (!rawResponse.ok) {
+      throw new Error(rawResponse.statusText);
+    }
     const content = (await rawResponse.json()) as LoginUserResponce;
 
-    console.log(content);
+    return content;
   }
 
   async signIn(user: LoginUser) {
@@ -78,9 +87,12 @@ class Users extends Api {
       },
       body: JSON.stringify(user),
     });
+    if (!rawResponse.ok) {
+      throw new Error(rawResponse.statusText);
+    }
     const content = (await rawResponse.json()) as LoginUserResponce;
 
-    console.log(content);
+    return content;
   }
 }
 

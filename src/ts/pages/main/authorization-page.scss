@@ -93,3 +93,32 @@ $niceFont: Rubik, sans-serif;
     }
   }
 }
+
+.user {
+  position: absolute;
+  top: 80px;
+  right: 0;
+  z-index: 1;
+  background-color: $lightcolor;
+  padding: 15px 25px;
+  border-radius: 7px;
+
+  &__name {
+    text-align: center;
+    margin-bottom: 10px;
+
+    &:nth-child(2) {
+      background-color: $color2;
+      color: white;
+      padding: 8px 3px;
+    }
+  }
+
+  &__logout {
+    text-align: center;
+    text-decoration: underline;
+    color: $color1;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+}
