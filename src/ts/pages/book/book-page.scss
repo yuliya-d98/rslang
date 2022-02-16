@@ -1,0 +1,104 @@
+// colors
+$color1: #23162a;
+$color2: #524c68;
+$color3: #874f68;
+$lightcolor: #e7c59f;
+$accentcolor: #a31e15;
+
+// others
+$transition: 0.2s ease-in all;
+$niceFont: Rubik, sans-serif;
+
+.book {
+  &__chapters {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 600px;
+    margin: 20px auto;
+
+    &_chapter {
+      text-align: center;
+      line-height: 30px;
+      width: 30px;
+      height: 30px;
+      border: 2px solid $color1;
+      color: $color1;
+      cursor: pointer;
+
+      &.showing {
+        color: white;
+        background-color: $color1;
+      }
+    }
+  }
+
+  &__pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+
+    &_btn {
+      text-align: center;
+      line-height: 30px;
+      width: 40px;
+      height: 30px;
+      border: 2px solid $color2;
+      color: $color1;
+      margin-right: 20px;
+      cursor: pointer;
+    }
+  }
+}
+
+.word {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  border: 1px solid $lightcolor;
+
+  &__image {
+    width: 300px;
+  }
+
+  &__container {
+    width: calc(100% - 340px);
+    padding: 15px 20px;
+  }
+
+  &__transcription {
+    font-weight: 700;
+    font-size: 24px;
+    margin-right: 15px;
+
+    &:first-child {
+      display: inline-block;
+    }
+  }
+
+  &__sound {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    display: inline-block;
+
+    &:hover svg {
+      fill: $color3;
+      transition: $transition;
+    }
+
+    & svg {
+      width: 100%;
+      height: 100%;
+      margin-bottom: -3px;
+    }
+  }
+}
+
+.rus {
+  color: lightslategray;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
