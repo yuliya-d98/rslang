@@ -19,6 +19,13 @@ class AuthorizationPage {
     this.isUserOpened = false;
   }
 
+  tokenOutOfTime() {
+    this.logOut();
+    this.isRegistration = false;
+    this.openModal();
+    // await users.getNewUserTokens(localStorage.getItem('userId') as string);
+  }
+
   open() {
     if (this.isAuthorized && !this.isUserOpened) {
       this.showUser();
@@ -47,11 +54,7 @@ class AuthorizationPage {
     logout.classList.add('user__logout');
     logout.innerText = 'Выйти';
     logout.addEventListener('click', () => {
-      localStorage.removeItem('name');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      this.isAuthorized = false;
+      this.logOut();
       this.closeUser();
     });
     container.append(logout);
@@ -59,6 +62,13 @@ class AuthorizationPage {
     const header = document.querySelectorAll('.container')[0];
     header?.append(container);
     this.isUserOpened = true;
+  }
+
+  logOut() {
+    localStorage.removeItem('name');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
   }
 
   closeUser() {
@@ -89,7 +99,7 @@ class AuthorizationPage {
     const registration = document.createElement('input');
     registration.classList.add('authorization__radio');
     registration.type = 'radio';
-    registration.checked = true;
+    registration.checked = this.isRegistration;
     registration.id = 'registration';
     registration.name = 'authorization';
     registration.addEventListener('change', () => {
@@ -105,7 +115,7 @@ class AuthorizationPage {
     const signIn = document.createElement('input');
     signIn.classList.add('authorization__radio');
     signIn.type = 'radio';
-    signIn.checked = false;
+    signIn.checked = !this.isRegistration;
     signIn.id = 'sign-in';
     signIn.name = 'authorization';
     signIn.addEventListener('change', () => {
@@ -131,12 +141,11 @@ class AuthorizationPage {
     const form = document.querySelector('.authorization__forms') as HTMLDivElement;
     form.innerHTML = '';
 
-    const registration = document.querySelectorAll('.authorization__radio')[0] as HTMLInputElement;
-    if (registration.checked) {
-      this.isRegistration = true;
+    const registr = document.querySelectorAll('.authorization__radio')[0] as HTMLInputElement;
+    this.isRegistration = registr.checked;
+    if (this.isRegistration) {
       this.openRegistration();
     } else {
-      this.isRegistration = false;
       this.openSignIn();
     }
   }
@@ -168,6 +177,7 @@ class AuthorizationPage {
     mailInput.type = 'email';
     mailInput.placeholder = 'example@gmail.com';
     mailInput.required = true;
+    mailInput.autocomplete = 'email';
     container.append(mailInput);
 
     // create password input
@@ -239,6 +249,7 @@ class AuthorizationPage {
     mailInput.type = 'email';
     mailInput.placeholder = 'example@gmail.com';
     mailInput.required = true;
+    mailInput.autocomplete = 'email';
     container.append(mailInput);
 
     // create password input

@@ -1,7 +1,7 @@
 import './book-page.scss';
 import Book from '../../core/api/book';
 import Page from '../../core/page';
-import { Word } from '../../core/typings/book';
+import { UserWords, Word, ChapterNames } from '../../core/typings/book';
 
 const book = new Book();
 
@@ -14,12 +14,19 @@ class BookPage extends Page {
 
   pageNumber: number;
 
+  isDifficultWords: boolean;
+
+  userWords: UserWords | null;
+
   constructor() {
     super();
-    this.currentChapter = 0;
-    this.chapters = Boolean(localStorage.getItem('token')) ? 7 : 6;
+    this.currentChapter = +(localStorage.getItem('currentChapter') as string) || 0;
+    this.chapters = 6;
+    this.pageNumber = +(localStorage.getItem('currentBookPage') as string) || 0;
     this.pages = 30;
-    this.pageNumber = 0;
+
+    this.isDifficultWords = false;
+    this.userWords = null;
   }
 
   render() {
@@ -31,6 +38,24 @@ class BookPage extends Page {
     const container = document.createElement('div');
     container.classList.add('section-container');
 
+    const chapters = this.renderChapters();
+    const chapterText = document.createElement('h2');
+    chapterText.innerText = ChapterNames[this.currentChapter];
+    chapterText.classList.add('book__header');
+    const pagination = this.currentChapter < this.chapters ? this.renderPagination() : '';
+    container.append(chapters, chapterText, pagination);
+
+    const wordsContainer = document.createElement('div');
+    wordsContainer.classList.add('book__words');
+    container.append(wordsContainer);
+
+    bookSection.append(container);
+    this.body.append(bookSection);
+    this.renderWords();
+    this.renderFooter();
+  }
+
+  renderChapters() {
     const chapters = document.createElement('div');
     chapters.classList.add('book__chapters');
     for (let i = 0; i < this.chapters; i += 1) {
@@ -43,6 +68,27 @@ class BookPage extends Page {
       chapter.dataset.chapter = i.toString();
       chapters.append(chapter);
     }
+
+    const hardWords = document.createElement('p');
+    hardWords.classList.add('book__chapters_chapter');
+    if (this.currentChapter === this.chapters) {
+      hardWords.classList.add('showing');
+    }
+    hardWords.innerText = 'Сложные слова';
+    hardWords.dataset.chapter = this.chapters.toString();
+
+    const learnedWords = document.createElement('p');
+    learnedWords.classList.add('book__chapters_chapter');
+    if (this.currentChapter === this.chapters + 1) {
+      learnedWords.classList.add('showing');
+    }
+    learnedWords.innerText = 'Изученные слова';
+    learnedWords.dataset.chapter = (this.chapters + 1).toString();
+
+    if (this.isAuthorized) {
+      chapters.append(hardWords, learnedWords);
+    }
+
     chapters.addEventListener('click', (event) => {
       if ((event.target as HTMLParagraphElement).closest('.book__chapters_chapter')) {
         const target = (event.target as HTMLParagraphElement).closest(
@@ -50,19 +96,32 @@ class BookPage extends Page {
         ) as HTMLParagraphElement;
         if (!target.classList.contains('showing')) {
           this.currentChapter = +(target.dataset.chapter as string);
+          localStorage.setItem('currentChapter', target.dataset.chapter as string);
           this.render();
         }
       }
     });
-    container.append(chapters);
+    return chapters;
+  }
 
+  renderPagination() {
     const pagination = document.createElement('div');
     pagination.classList.add('book__pagination');
+    const first = document.createElement('p');
+    first.classList.add('book__pagination_btn');
+    first.innerText = '<<';
+    first.addEventListener('click', () => {
+      this.pageNumber = 0;
+      localStorage.setItem('currentBookPage', this.pageNumber.toString());
+      this.render();
+    });
+    pagination.append(first);
     const prev = document.createElement('p');
     prev.classList.add('book__pagination_btn');
-    prev.innerText = '<<';
+    prev.innerText = '<';
     prev.addEventListener('click', () => {
       this.pageNumber = this.pageNumber === 0 ? 0 : this.pageNumber - 1;
+      localStorage.setItem('currentBookPage', this.pageNumber.toString());
       this.render();
     });
     pagination.append(prev);
@@ -72,26 +131,27 @@ class BookPage extends Page {
     pagination.append(current);
     const next = document.createElement('p');
     next.classList.add('book__pagination_btn');
-    next.innerText = '>>';
+    next.innerText = '>';
     next.addEventListener('click', () => {
-      this.pageNumber = this.pageNumber === this.pages ? this.pageNumber : this.pageNumber + 1;
+      this.pageNumber = this.pageNumber === this.pages - 1 ? this.pageNumber : this.pageNumber + 1;
+      localStorage.setItem('currentBookPage', this.pageNumber.toString());
       this.render();
     });
     pagination.append(next);
-    container.append(pagination);
-
-    const words = document.createElement('div');
-    words.classList.add('book__words');
-    container.append(words);
-
-    bookSection.append(container);
-    this.body.append(bookSection);
-    this.renderWords();
-    this.renderFooter();
+    const last = document.createElement('p');
+    last.classList.add('book__pagination_btn');
+    last.innerText = '>>';
+    last.addEventListener('click', () => {
+      this.pageNumber = this.pages - 1;
+      localStorage.setItem('currentBookPage', this.pageNumber.toString());
+      this.render();
+    });
+    pagination.append(last);
+    return pagination;
   }
 
-  renderWords() {
-    const container = document.querySelector('.book__words') as HTMLDivElement;
+  renderAnonymousWords(container: HTMLDivElement) {
+    this.isDifficultWords = false;
     book
       .getWordsOnPage(this.currentChapter, this.pageNumber)
       .then((content) => {
@@ -103,10 +163,86 @@ class BookPage extends Page {
       .catch((e) => console.error(e));
   }
 
-  renderWord(wordContent: Word) {
+  renderAuthorizedWords(container: HTMLDivElement) {
+    this.isDifficultWords = false;
+    book
+      .getAllUserWords()
+      .then((userWords) => {
+        this.userWords = userWords;
+        book
+          .getWordsOnPage(this.currentChapter, this.pageNumber)
+          .then((content) => {
+            container.innerHTML = '';
+            for (let i = 0; i < content.length; i += 1) {
+              const wordId = (content[i].id || content[i]._id) as string;
+              let difficulty = 'normal';
+              for (let j = 0; j < (this.userWords as UserWords).length; j += 1) {
+                if ((this.userWords as UserWords)[j].wordId === wordId) {
+                  difficulty = (this.userWords as UserWords)[j].difficulty;
+                }
+              }
+              this.renderWord(content[i], difficulty);
+            }
+          })
+          .catch((e) => console.error(e));
+      })
+      .catch((e) => console.error(e));
+  }
+
+  renderDifficultWords(container: HTMLDivElement) {
+    this.isDifficultWords = true;
+    book
+      .getFilteredWords('hard')
+      .then((content) => {
+        container.innerHTML = '';
+        if (content.length === 0) {
+          this.renderEmptyPage(container);
+          return;
+        } else {
+          for (let i = 0; i < content.length; i += 1) {
+            this.renderWord(content[i]);
+          }
+        }
+      })
+      .catch((e) => console.error(e));
+  }
+
+  renderEmptyPage(container: HTMLDivElement) {
+    const text = document.createElement('p');
+    text.innerText = 'Нет слов, соответствующих запросу';
+    container.append(text);
+  }
+
+  renderLearnedWords(container: HTMLDivElement) {
+    this.isDifficultWords = true;
+    book
+      .getFilteredWords('learned')
+      .then((content) => {
+        container.innerHTML = '';
+        for (let i = 0; i < content.length; i += 1) {
+          this.renderWord(content[i]);
+        }
+      })
+      .catch((e) => console.error(e));
+  }
+
+  renderWords() {
+    const container = document.querySelector('.book__words') as HTMLDivElement;
+    if (!this.isAuthorized) {
+      this.renderAnonymousWords(container);
+    } else if (this.isAuthorized && this.currentChapter < this.chapters) {
+      this.renderAuthorizedWords(container);
+    } else if (this.isAuthorized && this.currentChapter === this.chapters) {
+      this.renderDifficultWords(container);
+    } else {
+      this.renderLearnedWords(container);
+    }
+  }
+
+  renderWord(wordContent: Word, wordDifficulty = 'normal') {
     const word = document.createElement('div');
-    word.classList.add('word');
-    word.dataset.wordId = wordContent.id;
+    word.classList.add('word', wordDifficulty);
+    word.dataset.wordId = (wordContent.id || wordContent._id) as string;
 
     const image = document.createElement('img');
     image.classList.add('word__image');
@@ -120,7 +256,6 @@ class BookPage extends Page {
     const wordTranscription = document.createElement('p');
     wordTranscription.classList.add('word__transcription');
     wordTranscription.innerText = `${wordContent.word} - ${wordContent.transcription}`;
-    textContainer.append(wordTranscription);
 
     const sound = document.createElement('div');
     sound.classList.add('word__sound');
@@ -145,37 +280,102 @@ class BookPage extends Page {
 
       sound1.play().catch((e) => console.error(e));
     });
-    textContainer.append(sound);
 
     const wordTranslation = document.createElement('p');
     wordTranslation.classList.add('word__transcription', 'rus');
     wordTranslation.innerText = wordContent.wordTranslate;
-    textContainer.append(wordTranslation);
 
     const meaningEng = document.createElement('p');
     meaningEng.classList.add('word__text');
     meaningEng.innerHTML = wordContent.textMeaning;
-    textContainer.append(meaningEng);
 
     const meaningRus = document.createElement('p');
     meaningRus.classList.add('word__text', 'rus');
     meaningRus.innerText = wordContent.textMeaningTranslate;
-    textContainer.append(meaningRus);
 
     const example = document.createElement('p');
     example.classList.add('word__text');
     example.innerHTML = wordContent.textExample;
-    textContainer.append(example);
 
     const exampleRus = document.createElement('p');
     exampleRus.classList.add('word__text', 'rus');
     exampleRus.innerText = wordContent.textExampleTranslate;
-    textContainer.append(exampleRus);
+
+    textContainer.append(
+      wordTranscription,
+      sound,
+      wordTranslation,
+      meaningEng,
+      meaningRus,
+      example,
+      exampleRus
+    );
+
+    if (this.isAuthorized && !this.isDifficultWords && word.classList.contains('normal')) {
+      this.addDifAndLearnedBtnsTo(textContainer, word.dataset.wordId);
+    } else if (this.isAuthorized && this.isDifficultWords) {
+      this.addRemoveFromDifficultBtn(textContainer, word.dataset.wordId);
+    }
 
     word.append(textContainer);
 
     const wordsContainer = document.querySelector('.book__words');
     wordsContainer?.append(word);
+  }
+
+  addDifAndLearnedBtnsTo(container: HTMLDivElement, wordId: string) {
+    const addToDifficult = document.createElement('div');
+    addToDifficult.classList.add('word__btn', 'difficult');
+    addToDifficult.innerText = 'Добавить в сложные';
+    addToDifficult.addEventListener('click', () => {
+      this.addUserWordToDifficulty('hard', wordId);
+    });
+    const addToLearned = document.createElement('div');
+    addToLearned.classList.add('word__btn', 'learned');
+    addToLearned.innerText = 'Добавить в изученные';
+    addToLearned.addEventListener('click', () => {
+      this.addUserWordToDifficulty('learned', wordId);
+    });
+    container.append(addToDifficult, addToLearned);
+  }
+
+  addUserWordToDifficulty(difficulty: string, wordId: string) {
+    let isUserWord = false;
+    for (let i = 0; i < (this.userWords as UserWords).length; i += 1) {
+      if ((this.userWords as UserWords)[i].wordId === wordId) {
+        isUserWord = true;
+      }
+    }
+    if (isUserWord) {
+      book
+        .changeUserWordDifficulty(wordId, difficulty)
+        .then(() => {
+          this.render();
+        })
+        .catch((e) => console.error(e));
+    } else {
+      book
+        .createUserWord(wordId, difficulty)
+        .then(() => {
+          this.render();
+        })
+        .catch((e) => console.error(e));
+    }
+  }
+
+  addRemoveFromDifficultBtn(container: HTMLDivElement, wordId: string) {
+    const removeFromDifficultBtn = document.createElement('div');
+    removeFromDifficultBtn.classList.add('word__btn', 'remove');
+    removeFromDifficultBtn.innerText = 'X';
+    removeFromDifficultBtn.addEventListener('click', () => {
+      book
+        .updateUserWord(wordId, 'normal')
+        .then(() => {
+          this.render();
+        })
+        .catch((e) => console.error(e));
+    });
+    container.prepend(removeFromDifficultBtn);
   }
 }
 
