@@ -15,13 +15,16 @@ export const enum PageIds {
 
 class App {
   run() {
-    this.renderNewPage(PageIds.mainPageHash);
+    const fullCurrentHash = window.location.hash;
+    const hash = fullCurrentHash.slice(1);
+    this.renderNewPage(hash);
     this.enableRouteChange();
   }
 
   private enableRouteChange() {
     window.addEventListener('hashchange', () => {
-      const hash = window.location.hash.slice(1);
+      const fullCurrentHash = window.location.hash;
+      const hash = fullCurrentHash.slice(1);
       this.renderNewPage(hash);
     });
   }
@@ -37,6 +40,7 @@ class App {
       | null = null;
 
     switch (idPage) {
+      case '':
       case PageIds.mainPageHash:
         currentPage = new MainPage();
         break;

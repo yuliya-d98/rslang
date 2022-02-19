@@ -57,6 +57,7 @@ body {
       &:hover {
         color: $lightcolor;
         transition: $transition;
+        text-decoration: underline;
       }
     }
   }
