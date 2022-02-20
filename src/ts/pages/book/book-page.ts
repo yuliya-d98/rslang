@@ -219,8 +219,13 @@ class BookPage extends Page {
       .getFilteredWords('learned')
       .then((content) => {
         container.innerHTML = '';
-        for (let i = 0; i < content.length; i += 1) {
-          this.renderWord(content[i]);
+        if (content.length === 0) {
+          this.renderEmptyPage(container);
+          return;
+        } else {
+          for (let i = 0; i < content.length; i += 1) {
+            this.renderWord(content[i]);
+          }
         }
       })
       .catch((e) => console.error(e));

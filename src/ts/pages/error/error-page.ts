@@ -1,10 +1,19 @@
 import Page from '../../core/page';
 
 class ErrorPage extends Page {
-  //   constructor() {}
-
   render() {
-    console.log('render error page');
+    this.body.innerHTML = '';
+    this.renderHeader();
+
+    const container = document.createElement('div');
+    container.classList.add('section-container');
+
+    const text = document.createElement('p');
+    text.innerText = 'Страница не найдена';
+    container.append(text);
+
+    this.body.append(container);
+    this.renderFooter();
   }
 }
 

@@ -21,14 +21,14 @@ export const authors = [
     made: 'Главная страница, авторизация, учебник',
     shortlink: 'yuliya-d98',
   },
-  {
-    name: 'Алексей',
-    fullName: 'Жарский Алексей',
-    photo: '../../../assets/user-mal.png',
-    position: 'developer',
-    made: 'Список слов, аудиовызов, адаптивность',
-    shortlink: 'aleks1012',
-  },
+  // {
+  //   name: 'Алексей',
+  //   fullName: 'Жарский Алексей',
+  //   photo: '../../../assets/user-mal.png',
+  //   position: 'developer',
+  //   made: 'Список слов, аудиовызов, адаптивность',
+  //   shortlink: 'aleks1012',
+  // },
 ];
 
 class Page {
