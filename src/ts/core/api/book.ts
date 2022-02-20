@@ -1,9 +1,7 @@
 import AuthorizationPage from '../../pages/main/autorization-page';
 import { DifWord, Words, FilteredResponce, UserWords } from '../typings/book';
 import Api from './api';
-import Users from './authorization';
 
-const users = new Users();
 const authorization = new AuthorizationPage();
 
 class Book extends Api {
@@ -60,12 +58,7 @@ class Book extends Api {
       }
     );
     if (rawResponse.status === 401) {
-      users
-        .getNewUserTokens(userId)
-        .then(() => {
-          this.getWordDifficulty(wordId).catch((e) => console.error(e));
-        })
-        .catch((e) => console.error(e));
+      authorization.tokenOutOfTime();
     } else if (rawResponse.status === 404) {
       difficulty = 'normal';
     } else {
@@ -136,7 +129,7 @@ class Book extends Api {
         },
       }
     );
-    if (rawResponse.status === 402) {
+    if (rawResponse.status === 402 || rawResponse.status === 401) {
       authorization.tokenOutOfTime();
     }
     const content = (await rawResponse.json()) as UserWords;

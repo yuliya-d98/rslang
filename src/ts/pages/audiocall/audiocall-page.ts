@@ -2,6 +2,13 @@ import './audiocall-page.scss';
 import Games from '../../core/games';
 
 class AudiocallPage extends Games {
+  currentQuestionNumber: number;
+
+  constructor() {
+    super();
+    this.currentQuestionNumber = 0;
+  }
+
   render() {
     this.body.innerHTML = '';
     this.renderHeader();
@@ -64,7 +71,18 @@ class AudiocallPage extends Games {
     return screen;
   }
 
-  startGame() {}
+  startGame() {
+    this.words = [];
+    this.wordsDifficulty = [];
+    this.getWords(this.choosedChapter, this.currentPage)
+      .then(() => this.renderQuestion())
+      .catch((e) => console.error(e));
+  }
+
+  renderQuestion() {
+    console.log('1', this.words);
+    console.log('1', this.wordsDifficulty);
+  }
 
   closeGame() {}
 }

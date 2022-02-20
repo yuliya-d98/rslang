@@ -23,7 +23,6 @@ class AuthorizationPage {
     this.logOut();
     this.isRegistration = false;
     this.openModal();
-    // await users.getNewUserTokens(localStorage.getItem('userId') as string);
   }
 
   open() {

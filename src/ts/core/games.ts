@@ -1,15 +1,42 @@
+import Book from './api/book';
 import './games.scss';
 import Page from './page';
+import { UserWords, Words } from './typings/book';
+
+const book = new Book();
 
 class Games extends Page {
   numOfChapters: number;
 
   choosedChapter: number;
 
+  currentPage: number;
+
+  numOfPages: number;
+
+  isAuthorized: boolean;
+
+  words: Words;
+
+  numOfQuestions: number;
+
+  userWords: UserWords;
+
+  wordsDifficulty: string[];
+
   constructor() {
     super();
     this.numOfChapters = 6;
     this.choosedChapter = 0;
+    this.currentPage = localStorage.getItem('currentBookPage')
+      ? +(localStorage.getItem('currentBookPage') as string)
+      : 0;
+    this.numOfPages = 30;
+    this.isAuthorized = Boolean(localStorage.getItem('userId'));
+    this.words = [];
+    this.numOfQuestions = 30;
+    this.userWords = [];
+    this.wordsDifficulty = [];
   }
 
   renderChapterChoose() {
@@ -30,8 +57,10 @@ class Games extends Page {
   renderChapterText() {
     const text = document.createElement('p');
     text.classList.add('game__chapter_text');
-    const currentChapter = +(localStorage.getItem('currentChapter') as string) + 1;
-    this.choosedChapter = currentChapter;
+    this.choosedChapter = localStorage.getItem('currentChapter')
+      ? +(localStorage.getItem('currentChapter') as string)
+      : 0;
+    const currentChapter = this.choosedChapter + 1;
     text.innerText = `Уровень ${currentChapter}`;
     return text;
   }
@@ -54,8 +83,43 @@ class Games extends Page {
     return select;
   }
 
-  getWords() {
-    console.log('get words');
+  async getWords(chapter: number, pageNumber: number) {
+    if (this.words.length >= this.numOfQuestions) {
+      this.words.length = this.numOfQuestions;
+      if (this.isAuthorized) this.wordsDifficulty.length = this.numOfQuestions;
+    } else if (!this.isAuthorized) {
+      const content = await book.getWordsOnPage(chapter, pageNumber);
+      this.words.push(...content);
+      if (pageNumber > 0) {
+        this.getWords(chapter, pageNumber - 1).catch((e) => console.error(e));
+      } else if (pageNumber === 0 && chapter > 0) {
+        this.getWords(chapter - 1, pageNumber).catch((e) => console.error(e));
+      }
+    } else {
+      const userWords = await book.getAllUserWords();
+      this.userWords.push(...userWords);
+      const content = await book.getWordsOnPage(chapter, pageNumber);
+      this.words.push(...content);
+      for (let i = 0; i < content.length; i += 1) {
+        const wordId = (content[i].id || content[i]._id) as string;
+        let difficulty = 'normal';
+        for (let j = 0; j < this.userWords.length; j += 1) {
+          if (this.userWords[j].wordId === wordId) {
+            difficulty = this.userWords[j].difficulty;
+          }
+        }
+        this.wordsDifficulty.push(difficulty);
+      }
+      console.log('chapter, pageNumber', chapter, pageNumber);
+      if (pageNumber > 0) {
+        await this.getWords(chapter, pageNumber - 1).catch((e) => console.error(e));
+      } else if (pageNumber === 0 && chapter > 0) {
+        await this.getWords(chapter - 1, this.numOfPages - 1).catch((e) => console.error(e));
+      } else if (pageNumber === 0 && chapter === 0 && this.words.length > 30) {
+        this.words.length = this.numOfQuestions;
+        this.wordsDifficulty.length = this.numOfQuestions;
+      }
+    }
   }
 }
 
