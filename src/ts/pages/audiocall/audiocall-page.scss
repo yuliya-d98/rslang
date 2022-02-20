@@ -51,3 +51,133 @@ $niceFont: Rubik, sans-serif;
     }
   }
 }
+
+.question {
+  &__container {
+    position: absolute;
+    z-index: 2;
+    height: calc(100% - 40px);
+    width: calc(100% - 40px);
+    padding: 20px;
+    top: 0;
+    left: 0;
+    background-color: $color2;
+  }
+
+  &__close {
+    float: right;
+    cursor: pointer;
+  }
+
+  &__circles {
+    max-width: 700px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 40px auto;
+
+    &_circle {
+      width: 10px;
+      height: 10px;
+      background-color: #fff;
+      border-radius: 50%;
+
+      &.right {
+        background-color: green;
+      }
+
+      &.wrong {
+        background-color: red;
+      }
+    }
+  }
+
+  &__sound-btn {
+    margin: 0 auto;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+
+    & svg {
+      fill: white;
+    }
+
+    &:hover svg {
+      fill: $lightcolor;
+      transition: $transition;
+    }
+  }
+
+  &__answer-options {
+    margin-top: 100px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  &__answer-option {
+    font-family: $niceFont;
+    cursor: pointer;
+    border-radius: 7px;
+    padding: 5px 15px;
+    border: 2px solid $color3;
+    background-color: $color3;
+    font-size: 24px;
+
+    &:hover {
+      border: 2px solid $color1;
+      background-color: $color1;
+    }
+  }
+}
+
+.modal {
+  position: absolute;
+  z-index: 5;
+  max-width: 500px;
+  height: fit-content;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  background-color: #fff;
+  color: $color1;
+  padding: 20px;
+
+  &__background {
+    top: 0;
+    left: 0;
+    position: absolute;
+    z-index: 4;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(0, 0, 0, 0.4);
+  }
+
+  &__close {
+    float: right;
+    cursor: pointer;
+  }
+
+  &__result {
+    font-size: 24px;
+    text-align: center;
+    font-family: $niceFont;
+  }
+
+  &__image {
+    height: 200px;
+    margin: 30px auto;
+    object-fit: cover;
+    // object-position: 50% 50%;
+  }
+
+  &__text {
+    font-size: 20px;
+    text-align: center;
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+}
