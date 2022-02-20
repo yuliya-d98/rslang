@@ -67,12 +67,22 @@ class Page {
     audiocallLink.classList.add('header__links-link');
     audiocallLink.innerText = 'Аудиовызов';
     audiocallLink.href = `#${PageIds.audiocallPageHash}`;
+    audiocallLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.changeIsFromBook();
+      window.location.hash = PageIds.audiocallPageHash;
+    });
     headerLinks.append(audiocallLink);
 
     const sprintLink = document.createElement('a');
     sprintLink.classList.add('header__links-link');
     sprintLink.innerText = 'Спринт';
     sprintLink.href = `#${PageIds.sprintPageHash}`;
+    sprintLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.changeIsFromBook();
+      window.location.hash = PageIds.sprintPageHash;
+    });
     headerLinks.append(sprintLink);
 
     const statisticsLink = document.createElement('a');
@@ -95,6 +105,10 @@ class Page {
     header.append(container);
 
     this.body.append(header);
+  }
+
+  changeIsFromBook() {
+    localStorage.setItem('isFromBook', (window.location.hash === '#book-page').toString());
   }
 
   renderFooter() {
