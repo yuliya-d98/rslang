@@ -1,6 +1,7 @@
 import './audiocall-page.scss';
 import Games from '../../core/games';
 import Book from '../../core/api/book';
+import { Word } from '../../core/typings/book';
 
 const book = new Book();
 
@@ -9,10 +10,17 @@ class AudiocallPage extends Games {
 
   answerOptions: string[];
 
+  rightAnswers: Word[];
+
+  wrongAnswers: Word[];
+
   constructor() {
     super();
     this.currentQuestionNumber = 0;
     this.answerOptions = [];
+
+    this.rightAnswers = [];
+    this.wrongAnswers = [];
   }
 
   render() {
@@ -57,10 +65,7 @@ class AudiocallPage extends Games {
     const space = document.createElement('li');
     space.classList.add('audiocall__screen_text');
     space.innerText = 'используйте пробел для повтроного звучания слова;';
-    const enter = document.createElement('li');
-    enter.classList.add('audiocall__screen_text');
-    enter.innerText = 'enter для перехода к следующему вопросу.';
-    controls.append(numbers, space, enter);
+    controls.append(numbers, space);
     screen.append(controls);
 
     const chapter = this.renderChapterChoose();
@@ -86,8 +91,7 @@ class AudiocallPage extends Games {
   }
 
   renderQuestion() {
-    const rightAnswer = this.words[this.currentQuestionNumber];
-
+    this.currentQuestionNumber = 0;
     const container = document.createElement('div');
     container.classList.add('question__container');
 
@@ -107,6 +111,17 @@ class AudiocallPage extends Games {
       circles.append(circle);
     }
     container.append(circles);
+
+    const section = document.querySelector('.section-container') as HTMLDivElement;
+    section.append(container);
+
+    this.nextQuestion();
+  }
+
+  nextQuestion() {
+    const rightAnswer = this.words[this.currentQuestionNumber];
+
+    const container = document.querySelector('.question__container') as HTMLDivElement;
 
     const sound = new Audio();
     sound.src = `https://${book.backendDeploy}.herokuapp.com/${rightAnswer.audio}`;
@@ -133,13 +148,22 @@ class AudiocallPage extends Games {
         const answer = (e.target as HTMLDivElement).closest(
           '.question__answer-option'
         ) as HTMLParagraphElement;
-        this.openModal((answer.dataset.answer as string) === rightAnswer.wordTranslate);
+
+        const isRightAnswer = (answer.dataset.answer as string) === rightAnswer.wordTranslate;
+
+        const circles = document.querySelectorAll('.question__circles_circle');
+        circles[this.currentQuestionNumber].classList.add(isRightAnswer ? 'right' : 'wrong');
+
+        if (isRightAnswer) {
+          this.rightAnswers.push(rightAnswer);
+        } else {
+          this.wrongAnswers.push(rightAnswer);
+        }
+
+        this.openModal(isRightAnswer);
       }
     });
     container.append(answerOptions);
-
-    const section = document.querySelector('.section-container') as HTMLDivElement;
-    section.append(container);
 
     sound.play().catch((e) => console.error(e));
   }
@@ -185,6 +209,104 @@ class AudiocallPage extends Games {
     background?.remove();
     const modal = document.querySelector('.modal');
     modal?.remove();
+    const sound = document.querySelector('.question__sound-btn');
+    sound?.remove();
+    const answerOptions = document.querySelector('.question__answer-options');
+    answerOptions?.remove();
+    this.currentQuestionNumber += 1;
+    if (this.currentQuestionNumber === this.words.length) {
+      this.closeGame();
+      this.openResults();
+    } else {
+      this.nextQuestion();
+    }
+  }
+
+  openResults() {
+    const background = document.createElement('div');
+    background.classList.add('result__background');
+    background.addEventListener('click', () => {
+      this.closeResults();
+    });
+
+    const results = document.createElement('div');
+    results.classList.add('result');
+
+    const closeBtn = document.createElement('div');
+    closeBtn.classList.add('result__close');
+    closeBtn.innerText = 'X';
+    closeBtn.addEventListener('click', () => {
+      this.closeResults();
+    });
+    results.append(closeBtn);
+
+    const innerContainer = document.createElement('div');
+    innerContainer.classList.add('result__inner-container');
+
+    if (this.wrongAnswers.length) {
+      const mistakes = document.createElement('p');
+      mistakes.classList.add('result__header');
+      mistakes.innerText = 'Ошибок';
+      const mistakesCount = document.createElement('p');
+      mistakesCount.classList.add('result__header_number', 'wrong');
+      mistakesCount.innerText = this.wrongAnswers.length.toString();
+      innerContainer.append(mistakes, mistakesCount);
+      for (let i = 0; i < this.wrongAnswers.length; i += 1) {
+        this.addWordToResults(this.wrongAnswers[i], innerContainer);
+      }
+    }
+
+    if (this.wrongAnswers.length && this.rightAnswers.length) {
+      const line = document.createElement('hr');
+      line.classList.add('result__line');
+      innerContainer.append(line);
+    }
+
+    if (this.rightAnswers.length) {
+      const rightAnswer = document.createElement('p');
+      rightAnswer.classList.add('result__header');
+      rightAnswer.innerText = 'Знаю';
+      const rightAnswerCount = document.createElement('p');
+      rightAnswerCount.classList.add('result__header_number', 'right');
+      rightAnswerCount.innerText = this.rightAnswers.length.toString();
+      innerContainer.append(rightAnswer, rightAnswerCount);
+      for (let i = 0; i < this.rightAnswers.length; i += 1) {
+        this.addWordToResults(this.rightAnswers[i], innerContainer);
+      }
+    }
+
+    results.append(innerContainer);
+    const section = document.querySelector('.section-container') as HTMLDivElement;
+    section.append(background, results);
+  }
+
+  closeResults() {
+    const background = document.querySelector('.result__background');
+    const results = document.querySelector('.result');
+    background?.remove();
+    results?.remove();
+    this.rightAnswers = [];
+    this.wrongAnswers = [];
+  }
+
+  addWordToResults(word: Word, outerContainer: HTMLDivElement) {
+    const container = document.createElement('div');
+    container.classList.add('result__word');
+
+    const sound = document.createElement('div');
+    sound.classList.add('result__word_sound');
+    sound.innerHTML = `<svg class="MuiSvgIcon-root jss147" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>`;
+    sound.addEventListener('click', () => {
+      const audio = new Audio(`https://${book.backendDeploy}.herokuapp.com/${word.audio}`);
+      audio.play().catch((e) => console.error(e));
+    });
+
+    const text = document.createElement('p');
+    text.classList.add('result__word_text');
+    text.innerHTML = `<b>${word.word}</b> - ${word.wordTranslate}`;
+
+    container.append(sound, text);
+    outerContainer.append(container);
   }
 
   closeGame() {
@@ -195,29 +317,13 @@ class AudiocallPage extends Games {
   createAnswerOptions() {
     this.answerOptions = [this.words[this.currentQuestionNumber].wordTranslate];
     while (this.answerOptions.length < 5) {
-      const random = this.randomInteger(0, this.words.length);
+      const random = this.randomInteger(0, this.words.length - 1);
       const answerOption = this.words[random].wordTranslate;
       if (!this.answerOptions.includes(answerOption)) {
         this.answerOptions.push(answerOption);
       }
     }
     this.answerOptions = this.shuffleArray(this.answerOptions);
-  }
-
-  randomInteger(min: number, max: number) {
-    const random = min - 0.5 + Math.random() * (max - min + 1);
-    return Math.round(random);
-  }
-
-  shuffleArray(answers: string[]) {
-    const answersCopy = answers.slice();
-    for (let i = answersCopy.length - 1; i > 0; i -= 1) {
-      const j = Math.floor(Math.random() * i);
-      const temp = answersCopy[i];
-      answersCopy[i] = answersCopy[j];
-      answersCopy[j] = temp;
-    }
-    return answersCopy;
   }
 }
 

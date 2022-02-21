@@ -39,6 +39,8 @@ class Games extends Page {
     this.wordsDifficulty = [];
   }
 
+  // First Slide
+
   renderChapterChoose() {
     const chapter = document.createElement('div');
     chapter.classList.add('game__chapter');
@@ -48,8 +50,11 @@ class Games extends Page {
       const text = this.renderChapterText();
       chapter.append(text);
     } else {
+      const text = document.createElement('p');
+      text.classList.add('game__chapter_select_text');
+      text.innerText = 'Выберите уровень:';
       const input = this.renderChapterInput();
-      chapter.append(input);
+      chapter.append(text, input);
     }
     return chapter;
   }
@@ -83,6 +88,8 @@ class Games extends Page {
     return select;
   }
 
+  // Start Game
+
   async getWords(chapter: number, pageNumber: number) {
     if (this.words.length >= this.numOfQuestions) {
       this.words.length = this.numOfQuestions;
@@ -110,16 +117,31 @@ class Games extends Page {
         }
         this.wordsDifficulty.push(difficulty);
       }
-      console.log('chapter, pageNumber', chapter, pageNumber);
-      if (pageNumber > 0) {
-        await this.getWords(chapter, pageNumber - 1).catch((e) => console.error(e));
-      } else if (pageNumber === 0 && chapter > 0) {
-        await this.getWords(chapter - 1, this.numOfPages - 1).catch((e) => console.error(e));
-      } else if (pageNumber === 0 && chapter === 0 && this.words.length > 30) {
-        this.words.length = this.numOfQuestions;
-        this.wordsDifficulty.length = this.numOfQuestions;
-      }
     }
+    if (pageNumber > 0) {
+      await this.getWords(chapter, pageNumber - 1).catch((e) => console.error(e));
+    } else if (pageNumber === 0 && chapter > 0) {
+      await this.getWords(chapter - 1, this.numOfPages - 1).catch((e) => console.error(e));
+    } else if (pageNumber === 0 && chapter === 0 && this.words.length > 30) {
+      this.words.length = this.numOfQuestions;
+      this.wordsDifficulty.length = this.numOfQuestions;
+    }
+  }
+
+  randomInteger(min: number, max: number) {
+    const random = min - 0.5 + Math.random() * (max - min + 1);
+    return Math.round(random);
+  }
+
+  shuffleArray(answers: string[]) {
+    const answersCopy = answers.slice();
+    for (let i = answersCopy.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * i);
+      const temp = answersCopy[i];
+      answersCopy[i] = answersCopy[j];
+      answersCopy[j] = temp;
+    }
+    return answersCopy;
   }
 }
 

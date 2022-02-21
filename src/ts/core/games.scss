@@ -31,9 +31,15 @@ $niceFont: Rubik, sans-serif;
       outline: none;
       background-color: transparent;
       cursor: pointer;
+      margin: 0 auto;
 
       &:focus {
         outline: none;
+      }
+
+      &_text {
+        color: $accentcolor;
+        margin-bottom: 10px;
       }
     }
 
