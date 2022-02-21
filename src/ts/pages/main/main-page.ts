@@ -1,7 +1,6 @@
 import './main-page.scss';
 import Page, { authors } from '../../core/page';
 
-// TODO: change cards text
 const cardsText = [
   {
     header: 'Запоминай',
@@ -22,22 +21,33 @@ const cardsText = [
 ];
 
 class MainPage extends Page {
-  //   constructor() {}
-
   render() {
     this.body.innerHTML = '';
     this.renderHeader();
+    const background = document.createElement('div');
+    background.classList.add('main__background');
+
+    const section = document.createElement('section');
+    section.classList.add('section-container');
+
+    const header = document.createElement('h1');
+    header.classList.add('main__header');
+    header.innerText = 'RS Lang';
+
+    const aboutApp = this.aboutApp();
+    const aboutAuthors = this.aboutAuthors();
+    section.append(header, aboutApp, aboutAuthors);
+
+    background.append(section);
+    this.body.append(background);
     this.aboutApp();
     this.aboutAuthors();
     this.renderFooter();
   }
 
   aboutApp() {
-    const section = document.createElement('section');
-    section.classList.add('about-app');
-
     const container = document.createElement('div');
-    container.classList.add('section-container');
+    container.classList.add('about-app');
 
     const header = document.createElement('h2');
     header.classList.add('about-app__header');
@@ -49,9 +59,7 @@ class MainPage extends Page {
       container.append(card);
     }
 
-    section.append(container);
-
-    this.body.append(section);
+    return container;
   }
 
   createCardAboutApp(headerText: string, text: string) {
@@ -72,11 +80,8 @@ class MainPage extends Page {
   }
 
   aboutAuthors() {
-    const section = document.createElement('section');
-    section.classList.add('about-authors');
-
     const container = document.createElement('div');
-    container.classList.add('section-container');
+    container.classList.add('about-authors');
 
     const header = document.createElement('h2');
     header.classList.add('about-authors__header');
@@ -93,9 +98,7 @@ class MainPage extends Page {
 
     container.append(cardsContainer);
 
-    section.append(container);
-
-    this.body.append(section);
+    return container;
   }
 
   createCardAboutAuthor(author: {

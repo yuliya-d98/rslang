@@ -10,7 +10,7 @@ export const authors = [
     fullName: 'Комякевич Никита',
     photo: '../../../assets/user-mal.png',
     position: 'developer',
-    made: 'Спринт, прогресс изучения, статистика',
+    made: 'Спринт',
     shortlink: 'nikitsch',
   },
   {
@@ -18,7 +18,7 @@ export const authors = [
     fullName: 'Дубовик Юлия',
     photo: '../../../assets/user-fem.png',
     position: 'developer',
-    made: 'Главная страница, авторизация, учебник',
+    made: 'Главная страница, авторизация, учебник, аудиовызов',
     shortlink: 'yuliya-d98',
   },
   // {

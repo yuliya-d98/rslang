@@ -189,6 +189,7 @@ class AuthorizationPage {
     passwordInput.classList.add('authorization__forms_input');
     passwordInput.type = 'password';
     passwordInput.minLength = 8;
+    passwordInput.maxLength = 20;
     passwordInput.placeholder = '********';
     passwordInput.required = true;
     passwordInput.autocomplete = 'new-password';
@@ -261,6 +262,7 @@ class AuthorizationPage {
     passwordInput.classList.add('authorization__forms_input');
     passwordInput.type = 'password';
     passwordInput.minLength = 8;
+    passwordInput.maxLength = 20;
     passwordInput.placeholder = '********';
     passwordInput.required = true;
     passwordInput.autocomplete = 'current-password';

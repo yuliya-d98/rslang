@@ -11,8 +11,8 @@ class Users extends Api {
       },
       body: JSON.stringify(user),
     });
-    if (!rawResponse.ok) {
-      throw new Error(rawResponse.statusText);
+    if (rawResponse.status === 422) {
+      alert('Incorrect e-mail or password');
     }
     const content = (await rawResponse.json()) as CreateUserResponce;
     return content;
@@ -27,11 +27,10 @@ class Users extends Api {
       },
       body: JSON.stringify(user),
     });
-    if (!rawResponse.ok) {
-      throw new Error(rawResponse.statusText);
+    if (rawResponse.status === 403) {
+      alert('Incorrect e-mail or password');
     }
     const content = (await rawResponse.json()) as LoginUserResponce;
-    console.log('sign in output', content);
     return content;
   }
 

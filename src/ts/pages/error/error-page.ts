@@ -5,6 +5,9 @@ class ErrorPage extends Page {
     this.body.innerHTML = '';
     this.renderHeader();
 
+    const background = document.createElement('div');
+    background.classList.add('background');
+
     const container = document.createElement('div');
     container.classList.add('section-container');
 
@@ -12,7 +15,8 @@ class ErrorPage extends Page {
     text.innerText = 'Страница не найдена';
     container.append(text);
 
-    this.body.append(container);
+    background.append(container);
+    this.body.append(background);
     this.renderFooter();
   }
 }

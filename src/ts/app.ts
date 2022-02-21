@@ -51,7 +51,7 @@ class App {
         currentPage = new AudiocallPage();
         break;
       case PageIds.sprintPageHash:
-        currentPage = new AudiocallPage();
+        currentPage = new SprintPage();
         break;
       case PageIds.statisticsPageHash:
         currentPage = new StatisticsPage();

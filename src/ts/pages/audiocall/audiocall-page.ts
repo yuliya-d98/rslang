@@ -64,7 +64,7 @@ class AudiocallPage extends Games {
     numbers.innerText = 'для выбора варианта ответа используйте клавиши от 1 до 5;';
     const space = document.createElement('li');
     space.classList.add('audiocall__screen_text');
-    space.innerText = 'используйте пробел для повтроного звучания слова;';
+    space.innerText = 'используйте пробел для повторного звучания слова.';
     controls.append(numbers, space);
     screen.append(controls);
 
