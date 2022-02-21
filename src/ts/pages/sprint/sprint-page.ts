@@ -17,7 +17,6 @@ class SprintPage extends Page {
 
     background.append(container);
     this.body.append(background);
-    this.renderFooter();
   }
 }
 

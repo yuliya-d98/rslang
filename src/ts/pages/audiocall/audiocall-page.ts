@@ -45,7 +45,6 @@ class AudiocallPage extends Games {
 
     background.append(container);
     this.body.append(background);
-    this.renderFooter();
   }
 
   renderSplashScreen() {
