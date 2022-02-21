@@ -30,6 +30,9 @@ class Users extends Api {
     if (rawResponse.status === 403) {
       alert('Incorrect e-mail or password');
     }
+    if (rawResponse.status === 404) {
+      alert(`Couldn't find a user with this email`);
+    }
     const content = (await rawResponse.json()) as LoginUserResponce;
     return content;
   }

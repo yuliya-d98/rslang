@@ -14,6 +14,10 @@ class AudiocallPage extends Games {
 
   wrongAnswers: Word[];
 
+  isAnswers: boolean;
+
+  isModal: boolean;
+
   constructor() {
     super();
     this.currentQuestionNumber = 0;
@@ -21,6 +25,9 @@ class AudiocallPage extends Games {
 
     this.rightAnswers = [];
     this.wrongAnswers = [];
+
+    this.isAnswers = false;
+    this.isModal = false;
   }
 
   render() {
@@ -64,8 +71,12 @@ class AudiocallPage extends Games {
     numbers.innerText = 'для выбора варианта ответа используйте клавиши от 1 до 5;';
     const space = document.createElement('li');
     space.classList.add('audiocall__screen_text');
-    space.innerText = 'используйте пробел для повторного звучания слова.';
-    controls.append(numbers, space);
+    space.innerText = 'используйте пробел для повторного звучания слова;';
+    const enter = document.createElement('li');
+    enter.classList.add('audiocall__screen_text');
+    enter.innerText =
+      'и Enter чтобы закрыть окно с правильным ответом и перейти к следующему вопросу.';
+    controls.append(numbers, space, enter);
     screen.append(controls);
 
     const chapter = this.renderChapterChoose();
@@ -145,6 +156,7 @@ class AudiocallPage extends Games {
     }
     answerOptions.addEventListener('click', (e) => {
       if ((e.target as HTMLDivElement).closest('.question__answer-option')) {
+        this.isAnswers = false;
         const answer = (e.target as HTMLDivElement).closest(
           '.question__answer-option'
         ) as HTMLParagraphElement;
@@ -163,12 +175,37 @@ class AudiocallPage extends Games {
         this.openModal(isRightAnswer);
       }
     });
-    container.append(answerOptions);
 
+    container.append(answerOptions);
+    this.isAnswers = true;
+    document.addEventListener('keydown', this.keys.bind(this));
     sound.play().catch((e) => console.error(e));
   }
 
+  enterKey(e: KeyboardEvent) {
+    if (this.isModal && e.key === 'Enter') {
+      e.preventDefault();
+      this.closeModal();
+    }
+  }
+
+  keys(e: KeyboardEvent) {
+    if (this.isAnswers) {
+      e.preventDefault();
+      const soundButton = document.querySelector('.question__sound-btn') as HTMLDivElement;
+      if (e.key === ' ') soundButton.click();
+
+      const answers = document.querySelectorAll('.question__answer-option');
+      if (e.key === '1') (answers[0] as HTMLParagraphElement).click();
+      if (e.key === '2') (answers[1] as HTMLParagraphElement).click();
+      if (e.key === '3') (answers[2] as HTMLParagraphElement).click();
+      if (e.key === '4') (answers[3] as HTMLParagraphElement).click();
+      if (e.key === '5') (answers[4] as HTMLParagraphElement).click();
+    }
+  }
+
   openModal(isRightAnswer: boolean) {
+    document.removeEventListener('keydown', this.keys.bind(this));
     const rightAnswer = this.words[this.currentQuestionNumber];
 
     const background = document.createElement('div');
@@ -202,9 +239,12 @@ class AudiocallPage extends Games {
 
     const section = document.querySelector('.section-container') as HTMLDivElement;
     section.append(background, modal);
+    this.isModal = true;
+    document.addEventListener('keydown', this.enterKey.bind(this));
   }
 
   closeModal() {
+    this.isModal = false;
     const background = document.querySelector('.modal__background');
     background?.remove();
     const modal = document.querySelector('.modal');

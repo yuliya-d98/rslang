@@ -62,11 +62,12 @@ $niceFont: Rubik, sans-serif;
     }
 
     &_input {
-      width: 100%;
+      width: calc(100% - 14px);
       height: 30px;
       margin-bottom: 20px;
       border: none;
       border-bottom: 1px solid $color1;
+      padding: 0 7px;
 
       &:last-child {
         margin-bottom: 15px;
