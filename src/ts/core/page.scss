@@ -1,0 +1,106 @@
+// colors
+$color1: #23162a;
+$color2: #524c68;
+$color3: #874f68;
+$lightcolor: #e7c59f;
+$accentcolor: #a31e15;
+
+// others
+$transition: 0.2s ease-in all;
+$niceFont: Rubik, sans-serif;
+
+*,
+*::after,
+*::before {
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  text-decoration: none;
+  color: black;
+}
+
+h2,
+h3 {
+  font-family: $niceFont;
+}
+
+body {
+  min-height: 100vh;
+  position: relative;
+  z-index: 0;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.header {
+  width: 100%;
+  height: 70px;
+  background-color: $color3;
+
+  &__links {
+    &-link {
+      color: white;
+      margin-right: 25px;
+
+      &:hover {
+        color: $lightcolor;
+        transition: $transition;
+        text-decoration: underline;
+      }
+    }
+  }
+
+  &__autorization {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+
+    & svg {
+      fill: white;
+    }
+
+    &:hover svg {
+      fill: $lightcolor;
+      transition: $transition;
+    }
+  }
+}
+
+.footer {
+  background-color: $color1;
+  color: white;
+  padding: 10px 0;
+
+  &__authors {
+    &-author {
+      display: block;
+      color: white;
+
+      &:hover {
+        color: $lightcolor;
+        transition: $transition;
+      }
+    }
+  }
+
+  &__logo {
+    width: 130px;
+    height: 60px;
+    background-image: url('../../assets/schoolLogo.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+}
